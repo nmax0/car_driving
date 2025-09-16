@@ -20,17 +20,16 @@ k = 1/100
 phase = 0
 wave_speed = 200
 points = [(x, ground_y + ampl*math.sin(k*x)) for x in range(WIDTH)]
-print(points)
+
 wheel_radius = 15
 wheel_ang_front = 0
 wheel_ang_rear = 0
 car_w, car_h = 100, 60
 car_x, car_y = WIDTH // 2, ground_y - wheel_radius*2 - car_h
 
-
 vel = 0 # velocity : px/s
 acc = 50000 # acceleration : px/s^2
-damping = 0.99 # damping value
+damping = 0.999 # damping value
 brake = 0.85 # braking value
 
 def f(x): (math.sin(x/2)) * 50 + 400
@@ -77,6 +76,10 @@ while True:
     wheel_rear_cx = car_x+car_w/2+car_w/2/2
     wheel_rear_cy = car_y+car_h+wheel_radius
 
+    # wheels on ground
+    wheel_front_cy = points[int(wheel_front_cx)][1] - wheel_radius
+    wheel_rear_cy = points[int(wheel_rear_cx)][1] - wheel_radius
+
     # wheel rotation : ω = vel / rad
     wheel_ang_front += vel / wheel_radius * dt
     wheel_ang_rear += vel / wheel_radius * dt
@@ -104,13 +107,14 @@ while True:
     # --- Draw ---
     screen.fill(BLACK)
     # car
-    pygame.draw.rect(screen, CAR_COLOR, (car_x, car_y, car_w, car_h), 1) # rect
+    # car_points = [(car_w, wheel_front_cy)]
+    # pygame.draw.lines(screen, GREEN, False, car_points, 2)
     # wheel 1
     pygame.draw.circle(screen, CAR_COLOR, (wheel_front_cx, wheel_front_cy), wheel_radius, 1)
     pygame.draw.line(screen, RED, A1, A2, 1)
     pygame.draw.line(screen, RED, B1, B2, 1)
     # wheel 2
-    pygame.draw.circle(screen, CAR_COLOR, (wheel_rear_cx, wheel_front_cy), wheel_radius, 1)
+    pygame.draw.circle(screen, CAR_COLOR, (wheel_rear_cx, wheel_rear_cy), wheel_radius, 1)
     pygame.draw.line(screen, RED, C1, C2, 1)
     pygame.draw.line(screen, RED, D1, D2, 1)
     # ground
