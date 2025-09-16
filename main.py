@@ -24,7 +24,7 @@ points = [(x, ground_y + ampl*math.sin(k*x)) for x in range(WIDTH)]
 wheel_radius = 15
 wheel_ang_front = 0
 wheel_ang_rear = 0
-car_w, car_h = 100, 60
+car_w, car_h = 100, 40
 car_x, car_y = WIDTH // 2, ground_y - wheel_radius*2 - car_h
 
 vel = 0 # velocity : px/s
@@ -107,8 +107,24 @@ while True:
     # --- Draw ---
     screen.fill(BLACK)
     # car
-    # car_points = [(car_w, wheel_front_cy)]
-    # pygame.draw.lines(screen, GREEN, False, car_points, 2)
+    ang = math.atan((wheel_rear_cy - wheel_front_cy) / car_w)
+    x0, y0 = wheel_rear_cx+wheel_radius, wheel_rear_cy-wheel_radius
+    x1, y1 = wheel_front_cx-wheel_radius, wheel_front_cy-wheel_radius
+    dx, dy = x1 - x0, y1 - y0
+    L = math.hypot(dx, dy)
+    ux, uy = dx/L, dy/L
+    nx, ny = -uy, ux
+    d_offset = car_h    # blue length (px), distance from gray to red
+    L_red    = L   # red length (px)
+    t_along  = 0
+    Sx = x0 + ux*t_along + nx*d_offset
+    Sy = y0 + uy*t_along + ny*d_offset
+    Ex = Sx + ux*L_red
+    Ey = Sy + uy*L_red
+    x2, y2 = int(Ex), int(Ey)
+    x3, y3 = int(Sx), int(Sy)
+    car_points = [(x0, y0), (x1, y1), (x2, y2), (x3, y3), (x0, y0)]
+    pygame.draw.lines(screen, WHITE, False, car_points, 1)
     # wheel 1
     pygame.draw.circle(screen, CAR_COLOR, (wheel_front_cx, wheel_front_cy), wheel_radius, 1)
     pygame.draw.line(screen, RED, A1, A2, 1)
