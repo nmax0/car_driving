@@ -13,13 +13,14 @@ RED   = (200, 50, 50)
 GREEN   = (50, 200, 50)
 WHITE = (255, 255, 255)
 CAR_COLOR = WHITE
+SPOKE_COLOR = RED
 
 ground_y = 400
 ampl = 30
-k = 1/100
+k = 50
 phase = 0
 wave_speed = 200
-points = [(x, ground_y + ampl*math.sin(k*x)) for x in range(WIDTH)]
+points = [(x, ground_y + ampl*math.sin((1/k)*x)) for x in range(WIDTH)]
 
 wheel_radius = 15
 wheel_ang_front = 0
@@ -55,9 +56,13 @@ while True:
     is_braking = False
     # --- Keys ---
     keys = pygame.key.get_pressed()
+    if keys[pygame.K_UP]: k += 1
+    if keys[pygame.K_DOWN]: k -= 1
     if keys[pygame.K_LEFT]: a -= acc * dt
     if keys[pygame.K_RIGHT]: a += acc * dt
     if keys[pygame.K_SPACE]: is_braking = True
+
+    if k < 1: k = 1
 
     # car motion
     vel += a * dt
@@ -87,22 +92,28 @@ while True:
     # spoke angle
     dx1 = math.cos(wheel_ang_front) * (wheel_radius - 2)
     dy1 = math.sin(wheel_ang_front) * (wheel_radius - 2)
-    dx2 = math.cos(wheel_ang_front + math.pi/2) * (wheel_radius - 2)
-    dy2 = math.sin(wheel_ang_front + math.pi/2) * (wheel_radius - 2)
+    dx2 = math.cos(wheel_ang_front + math.pi/3) * (wheel_radius - 2)
+    dy2 = math.sin(wheel_ang_front + math.pi/3) * (wheel_radius - 2)
+    dx3 = math.cos(wheel_ang_front - math.pi/3) * (wheel_radius - 2)
+    dy3 = math.sin(wheel_ang_front - math.pi/3) * (wheel_radius - 2)
 
-    # front lines : A1-A2 & B1-B2
-    A1 = (wheel_front_cx - dx1, wheel_front_cy - dy1) 
-    A2 = (wheel_front_cx + dx1, wheel_front_cy + dy1)
-    B1 = (wheel_front_cx - dx2, wheel_front_cy - dy2) 
-    B2 = (wheel_front_cx + dx2, wheel_front_cy + dy2)
-    # rear lines : C1-C2 & D1-D2
-    C1 = (wheel_rear_cx - dx1, wheel_rear_cy - dy1) 
-    C2 = (wheel_rear_cx + dx1, wheel_rear_cy + dy1)
-    D1 = (wheel_rear_cx - dx2, wheel_rear_cy - dy2) 
-    D2 = (wheel_rear_cx + dx2, wheel_rear_cy + dy2)
+    # front lines
+    F11 = (wheel_front_cx - dx1, wheel_front_cy - dy1) 
+    F12 = (wheel_front_cx + dx1, wheel_front_cy + dy1)
+    F21 = (wheel_front_cx - dx2, wheel_front_cy - dy2) 
+    F22 = (wheel_front_cx + dx2, wheel_front_cy + dy2)
+    F31 = (wheel_front_cx - dx3, wheel_front_cy - dy3) 
+    F32 = (wheel_front_cx + dx3, wheel_front_cy + dy3)
+    # rear lines
+    R11 = (wheel_rear_cx - dx1, wheel_rear_cy - dy1) 
+    R12 = (wheel_rear_cx + dx1, wheel_rear_cy + dy1)
+    R21 = (wheel_rear_cx - dx2, wheel_rear_cy - dy2) 
+    R22 = (wheel_rear_cx + dx2, wheel_rear_cy + dy2)
+    R31 = (wheel_rear_cx - dx3, wheel_rear_cy - dy3) 
+    R32 = (wheel_rear_cx + dx3, wheel_rear_cy + dy3)
 
     # phase += wave_speed * dt
-    points = [(x, ground_y + ampl*math.sin(k*(x + phase))) for x in range(WIDTH)]
+    points = [(x, ground_y + ampl*math.sin((1/k)*(x + phase))) for x in range(WIDTH)]
 
     # --- Draw ---
     screen.fill(BLACK)
@@ -127,12 +138,14 @@ while True:
     pygame.draw.lines(screen, WHITE, False, car_points, 1)
     # wheel 1
     pygame.draw.circle(screen, CAR_COLOR, (wheel_front_cx, wheel_front_cy), wheel_radius, 1)
-    pygame.draw.line(screen, RED, A1, A2, 1)
-    pygame.draw.line(screen, RED, B1, B2, 1)
+    pygame.draw.line(screen, SPOKE_COLOR, F11, F12, 1)
+    pygame.draw.line(screen, SPOKE_COLOR, F21, F22, 1)
+    pygame.draw.line(screen, SPOKE_COLOR, F31, F32, 1)
     # wheel 2
     pygame.draw.circle(screen, CAR_COLOR, (wheel_rear_cx, wheel_rear_cy), wheel_radius, 1)
-    pygame.draw.line(screen, RED, C1, C2, 1)
-    pygame.draw.line(screen, RED, D1, D2, 1)
+    pygame.draw.line(screen, SPOKE_COLOR, R11, R12, 1)
+    pygame.draw.line(screen, SPOKE_COLOR, R21, R22, 1)
+    pygame.draw.line(screen, SPOKE_COLOR, R31, R32, 1)
     # ground
     pygame.draw.aalines(screen, GREEN, False, points, 1)
     # draw_curve(screen, GREEN, f, 0, WIDTH)
