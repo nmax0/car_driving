@@ -29,8 +29,7 @@ car_w, car_h = 100, 40
 car_x, car_y = WIDTH // 2, ground_y - wheel_radius*2 - car_h
 
 vel = 0 # velocity : px/s
-acc = 50000 # acceleration : px/s^2
-damping = 0.999 # damping value
+acc = 5000 # acceleration : px/s^2
 brake = 0.85 # braking value
 
 def f(x): (math.sin(x/2)) * 50 + 400
@@ -41,6 +40,11 @@ def draw_curve(screen, color, f, x0, x1):
         y = f(x)
         pygame.draw.aaline(screen, color, (x - 1, y_prev), (x, y))
         y_prev = y
+
+# text
+font = pygame.font.SysFont("Arial", 25)
+k_txt_surf = font.render(f"k : 1/{k}", True, WHITE)
+k_txt_rect = k_txt_surf.get_rect(center=(WIDTH*0.7, 50))
 
 x = 0
 # --- Main loop ---
@@ -56,24 +60,31 @@ while True:
     is_braking = False
     # --- Keys ---
     keys = pygame.key.get_pressed()
-    if keys[pygame.K_UP]: k += 1
-    if keys[pygame.K_DOWN]: k -= 1
+    if keys[pygame.K_ESCAPE]: break
+    if keys[pygame.K_UP]: 
+        k += 1
+        k_txt_surf = font.render(f"k : 1/{k}", True, (255, 255, 255))
+        k_txt_rect = k_txt_surf.get_rect(center=(WIDTH*0.7, 50))
+    if keys[pygame.K_DOWN]: 
+        k -= 1
+        if k < 1: k = 1
+        k_txt_surf = font.render(f"k : 1/{k}", True, (255, 255, 255))
+        k_txt_rect = k_txt_surf.get_rect(center=(WIDTH*0.7, 50))
     if keys[pygame.K_LEFT]: a -= acc * dt
     if keys[pygame.K_RIGHT]: a += acc * dt
     if keys[pygame.K_SPACE]: is_braking = True
 
-    if k < 1: k = 1
-
     # car motion
     vel += a * dt
-    if is_braking: vel *= brake 
-    else: vel *= damping
-    # car_x += vel * dt
+    if is_braking:
+        vel *= brake
+        if abs(vel) < 5: vel = 0
+    vel = round(vel)
     phase += vel * dt
-
-    # screen boundaries
-    # if car_x < 0: car_x = 0
-    # if car_x + car_w > WIDTH: car_x = WIDTH - car_w
+    
+    # text
+    vel_txt_surf = font.render(f"vel : {abs(vel)}", True, WHITE)
+    vel_txt_rect = k_txt_surf.get_rect(center=(WIDTH*0.3, 50))
 
     # wheel pos
     wheel_front_cx = car_x+car_w/2/2
@@ -148,7 +159,8 @@ while True:
     pygame.draw.line(screen, SPOKE_COLOR, R31, R32, 1)
     # ground
     pygame.draw.aalines(screen, GREEN, False, points, 1)
-    # draw_curve(screen, GREEN, f, 0, WIDTH)
-    # pygame.draw.line(screen, GREEN, (0, ground_y), (WIDTH, ground_y), 1)
+    # text
+    screen.blit(k_txt_surf, k_txt_rect)
+    screen.blit(vel_txt_surf, vel_txt_rect)
     # display
     pygame.display.flip()
